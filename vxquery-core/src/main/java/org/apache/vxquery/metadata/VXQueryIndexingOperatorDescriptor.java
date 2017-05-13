@@ -69,6 +69,7 @@ public class VXQueryIndexingOperatorDescriptor extends AbstractSingleActivityOpe
         collectionPartitions = ds.getPartitions();
         dataSourceId = (short) ds.getDataSourceId();
         totalDataSources = (short) ds.getTotalDataSources();
+        outRecDescs[0] = rDesc;
         childSeq = ds.getChildSeq();
         indexChildSeq = ds.getIndexChildSeq();
         indexAttsSeq = ds.getIndexAttsSeq();
