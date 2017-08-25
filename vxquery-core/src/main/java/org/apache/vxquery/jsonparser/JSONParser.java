@@ -64,6 +64,7 @@ public class JSONParser implements IParser {
     protected IFrameFieldAppender appender;
     protected boolean[] matchedKeys;
     protected Object[] subelements;
+    protected Long arrayItems;
     protected boolean skipping;
 
     enum itemType {
@@ -99,6 +100,7 @@ public class JSONParser implements IParser {
         subelements = new Object[valuePointables.size()];
         matchedKeys = new boolean[valuePointables.size()];
         skipping = true;
+        arrayItems = new Long(1);
         for (int i = 0; i < valuePointables.size(); i++) {
             int start = valuePointables.get(i).getStartOffset() + 1;
             int length = valuePointables.get(i).getLength() - 1;
