@@ -66,6 +66,7 @@ public class JSONParser implements IParser {
     protected Object[] subelements;
     protected Long arrayItems;
     protected boolean skipping;
+    protected final List<Long> itemsinArray;
 
     enum itemType {
         ARRAY,
@@ -101,6 +102,7 @@ public class JSONParser implements IParser {
         matchedKeys = new boolean[valuePointables.size()];
         skipping = true;
         arrayItems = new Long(1);
+        itemsinArray = new ArrayList<>();
         for (int i = 0; i < valuePointables.size(); i++) {
             int start = valuePointables.get(i).getStartOffset() + 1;
             int length = valuePointables.get(i).getLength() - 1;
@@ -325,10 +327,18 @@ public class JSONParser implements IParser {
     private boolean pathMatch() {
         boolean contains = true;
         if (!allKeys.isEmpty() && allKeys.size() <= valuePointables.size()) {
-            if (allKeys.get(allKeys.size() - 1).equals(subelements[allKeys.size() - 1])) {
-                matchedKeys[allKeys.size() - 1] = true;
+            if (allKeys.get(allKeys.size() - 1) instanceof Long) {
+                if (arrayCounters.get(arrayCounters.size() - 1).equals(subelements[allKeys.size() - 1])) {
+                    matchedKeys[allKeys.size() - 1] = true;
+                } else {
+                    matchedKeys[allKeys.size() - 1] = false;
+                }
             } else {
-                matchedKeys[allKeys.size() - 1] = false;
+                if (allKeys.get(allKeys.size() - 1).equals(subelements[allKeys.size() - 1])) {
+                    matchedKeys[allKeys.size() - 1] = true;
+                } else {
+                    matchedKeys[allKeys.size() - 1] = false;
+                }
             }
         }
         for (boolean b : matchedKeys) {
@@ -348,7 +358,8 @@ public class JSONParser implements IParser {
             boolean addCounter = subelements[allKeys.size()].equals(Boolean.TRUE) ? false : true;
             if (addCounter) {
                 this.arrayCounters.set(levelArray - 1, this.arrayCounters.get(levelArray - 1) + 1);
-                this.allKeys.add(new Long(this.arrayCounters.get(levelArray - 1)));
+                //this.allKeys.add(new Long(this.arrayCounters.get(levelArray - 1)));
+                this.allKeys.add(arrayItems);
             } else {
                 this.allKeys.add(Boolean.TRUE);
             }
@@ -405,7 +416,8 @@ public class JSONParser implements IParser {
             if (itemStack.get(itemStack.size() - 1) == itemType.ARRAY) {
                 if (addCounter) {
                     this.arrayCounters.set(levelArray - count, this.arrayCounters.get(levelArray - count) + 1);
-                    this.allKeys.add(new Long(this.arrayCounters.get(levelArray - count)));
+                    //this.allKeys.add(new Long(this.arrayCounters.get(levelArray - count)));
+                    this.allKeys.add(arrayItems);
                 } else {
                     this.allKeys.add(Boolean.TRUE);
                 }
