@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.hyracks.api.application.ICCApplication;
+import org.apache.hyracks.api.application.ICCServiceContext;
 import org.apache.hyracks.api.application.IServiceContext;
 import org.apache.hyracks.api.client.ClusterControllerInfo;
 import org.apache.hyracks.api.config.IConfigManager;
@@ -71,8 +72,8 @@ public class VXQueryApplication implements ICCApplication {
             }
         }
 
-        VXQueryConfig config = loadConfiguration(ccAppCtx.getCCContext().getClusterControllerInfo(),
-                appArgs.getVxqueryConfig());
+        VXQueryConfig config = loadConfiguration(
+                ((ICCServiceContext) ccAppCtx).getCCContext().getClusterControllerInfo(), appArgs.getVxqueryConfig());
         vxQueryService = new VXQueryService(config);
         restServer = new RestServer(vxQueryService, appArgs.getRestPort());
     }
