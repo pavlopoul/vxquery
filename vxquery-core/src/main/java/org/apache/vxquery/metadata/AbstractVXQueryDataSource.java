@@ -16,31 +16,38 @@
  */
 package org.apache.vxquery.metadata;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hyracks.algebricks.core.algebra.base.LogicalVariable;
 import org.apache.hyracks.algebricks.core.algebra.metadata.IDataSourcePropertiesProvider;
 import org.apache.hyracks.algebricks.core.algebra.properties.FunctionalDependency;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
+import org.apache.hyracks.data.std.api.IPointable;
+import org.apache.hyracks.data.std.api.IValueReference;
+import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 
 public abstract class AbstractVXQueryDataSource implements IVXQueryDataSource {
+    private static final long serialVersionUID = 1L;
+
     protected static final String DELIMITER = "\\|";
     protected int dataSourceId;
     protected String collectionName;
     protected String[] collectionPartitions;
 
-    protected List<Integer> childSeq;
     protected List<Integer> indexChildSeq;
     protected List<Byte[]> indexValueSeq;
     protected List<Integer> indexAttsSeq;
-    protected List<Byte[]> valueSeq;
+    protected List<Integer> childSeq = new ArrayList<>();
+    protected List<Integer> valueOffsets = new ArrayList<>();
+    protected ArrayBackedValueStorage valueAbvs = new ArrayBackedValueStorage();
     protected int totalDataSources;
     protected String tag;
 
     protected Object[] types;
 
     protected IDataSourcePropertiesProvider propProvider;
-    
+
     @Override
     public INodeDomain getDomain() {
         return null;
@@ -94,10 +101,12 @@ public abstract class AbstractVXQueryDataSource implements IVXQueryDataSource {
     public void computeFDs(List<LogicalVariable> scanVariables, List<FunctionalDependency> fdList) {
     }
 
+    @Override
     public void addChildSeq(int integer) {
         childSeq.add(integer);
     }
 
+    @Override
     public List<Integer> getChildSeq() {
         return childSeq;
     }
@@ -126,12 +135,29 @@ public abstract class AbstractVXQueryDataSource implements IVXQueryDataSource {
         return indexValueSeq;
     }
 
-    public void addValueSeq(Byte[] value) {
-        valueSeq.add(value);
+    public void appendValueSequence(IValueReference value) {
+        valueAbvs.append(value);
+        valueOffsets.add(valueAbvs.getLength());
     }
 
-    public List<Byte[]> getValueSeq() {
-        return valueSeq;
+    public void getValueSequence(int index, IPointable value) {
+        if (index == 0) {
+            value.set(valueAbvs.getByteArray(), 0, valueOffsets.get(index));
+        } else {
+            value.set(valueAbvs.getByteArray(), valueOffsets.get(index - 1), valueOffsets.get(index));
+        }
+    }
+
+    public byte[] getValueBytes() {
+        return valueAbvs.getByteArray();
+    }
+
+    public List<Integer> getValueOffsets() {
+        return valueOffsets;
+    }
+
+    public int getValueCount() {
+        return valueOffsets.size();
     }
 
     public String[] getPartitions() {
@@ -143,4 +169,5 @@ public abstract class AbstractVXQueryDataSource implements IVXQueryDataSource {
     }
 
     abstract public boolean usingIndex();
+
 }
