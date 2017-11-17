@@ -176,7 +176,7 @@ public class PushIndexingIntoDatascanRule extends AbstractUsedVariablesProcessin
         Byte[] index = null;
         AbstractFunctionCallExpression valueEq = (AbstractFunctionCallExpression) expression.getValue();
         if (valueEq.getArguments().get(1).getValue().getExpressionTag() == LogicalExpressionTag.FUNCTION_CALL) {
-            index = ExpressionToolbox.getConstantArgument(valueEq.getArguments().get(1), 0);
+            index = ExpressionToolbox.getConstantArguments(valueEq.getArguments().get(1), 0);
         } else {
             index = convertConstantToInteger(valueEq.getArguments().get(1));
         }
